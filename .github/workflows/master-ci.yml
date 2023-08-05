@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  APP_NAME: ${{ github.event.repository.name }}
+  CR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/go-cache
+
+      - name: Linting
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+
+  build:
+    needs:
+      - lint
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/go-cache
+
+      - name: Build
+        shell: bash
+        run: go build -o $APP_NAME .
+
+      - name: Upload executable file as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.APP_NAME }}
+          path: ${{ env.APP_NAME }}
+          if-no-files-found: error
+
+  dockerize:
+    needs:
+      - build
+
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download executable file
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.APP_NAME }}
+
+      - name: Build Docker image
+        shell: bash
+        run: docker build . --tag $APP_NAME
+
+      - name: Login to container registry
+        shell: bash
+        run: echo $CR_TOKEN | docker login ghcr.io -u $ --password-stdin
+
+      - name: Push image to container registry
+        shell: bash
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$APP_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          docker tag $APP_NAME $IMAGE_ID
+          docker push $IMAGE_ID:latest
+
+  unit-test:
+    needs:
+      - dockerize
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/go-cache
+
+      - name: Run tests
+        run: go test -tags=unit -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage output as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage
+          path: coverage.out
+
+  coverage:
+    needs:
+      - unit-test
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download coverage output
+        uses: actions/download-artifact@v3
+        with:
+          name: code-coverage
+
+      - name: Code analysis
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_REPO_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Quality Gate check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  security-analysis:
+    needs:
+      - coverage
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run security analysis with gosec
+        uses: securego/gosec@master
+        with:
+          args: ./...

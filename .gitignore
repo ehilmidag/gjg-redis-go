@@ -1,0 +1,11 @@
+.env
+.idea/
+.fleet/
+.vscode/
+out/
+tmp/
+go-rest-api-boilerplate
+coverage.txt
+coverage.out
+results.sarif
+results.html
