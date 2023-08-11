@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"go-rest-api-boilerplate/pkg/config"
+	"gjg-redis-go/pkg/config"
 
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
@@ -29,13 +29,13 @@ type server struct {
 	handlers   []Handler
 }
 
-func NewServer(config config.Config, handlers []Handler) Server {
+func NewServer(config *config.Config, handlers []Handler) Server {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		JSONEncoder:           json.Marshal,
 		JSONDecoder:           json.Unmarshal,
 	})
-	serverPort := config.GetServerPort()
+	serverPort := config.ServerPort
 
 	return &server{
 		serverPort: serverPort,
@@ -52,7 +52,6 @@ func (server *server) Start() error {
 		<-shutdownChannel
 		_ = server.fiber.Shutdown()
 	}()
-
 	server.RegisterRoutes()
 
 	serverAddress := fmt.Sprintf(":%s", server.serverPort)

@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"go-rest-api-boilerplate/pkg/logger"
+	"gjg-redis-go/pkg/logger"
 )
 
 const StackSkipAmount = 7

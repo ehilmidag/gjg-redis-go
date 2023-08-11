@@ -1,16 +1,32 @@
 package config
 
-import "github.com/pkg/errors"
-
 var (
-	EnvironmentVariablesNotDefined = errors.New("environment variables is not defined")
+	EnvironmentVariableNotDefined = "%s variable is not defined"
 )
 
 // #nosec
 const (
 	IsAtRemote = "IS_AT_REMOTE"
 
-	ServerPort      = "SERVER_PORT"
-	PactBrokerURL   = "PACT_BROKER_URL"
-	PactBrokerToken = "PACT_BROKER_TOKEN"
+	ServerPort    = "SERVER_PORT"
+	MySQLUsername = "MYSQL_USER"
+	MySQLPassword = "MYSQL_PASSWORD"
+	MySQLHostname = "MYSQL_HOST"
+	MySQLDbName   = "MYSQL_DB_NAME"
+	RedisAddr     = "REDIS_ADDR"
+	RedisPassword = "REDIS_PASSWORD"
+	RedisDb       = "REDIS_DB"
 )
+
+type MySQLConfig struct {
+	Username string
+	Password string
+	Hostname string
+	Dbname   string
+}
+
+type RedisConfig struct {
+	Addr     string
+	Password string
+	Db       int
+}
