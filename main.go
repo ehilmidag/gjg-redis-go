@@ -39,8 +39,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	mySqlconf, err := config.ReadMySqlConfig()
-	fmt.Println(mySqlconf)
 	db, err := initializeDB()
 	if err != nil {
 		log.Fatal(err)
