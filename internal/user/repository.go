@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type DataRepository interface {
+type Repository interface {
 	RedisCreateUser(ctx context.Context, userid string) error
 	RedisCreateUserByCountry(ctx context.Context, userid string, countryCode string) error
 	RedisGetRankByID(ctx context.Context, userid string) (int64, error)

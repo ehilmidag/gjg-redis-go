@@ -16,7 +16,7 @@ type Handler interface {
 
 type handler struct {
 	userService    Service
-	userRepository DataRepository
+	userRepository Repository
 }
 
 func (h *handler) RegisterRoutes(app *fiber.App) {
@@ -28,7 +28,7 @@ func (h *handler) RegisterRoutes(app *fiber.App) {
 
 }
 
-func NewHandler(userService Service, userRepository DataRepository) Handler {
+func NewHandler(userService Service, userRepository Repository) Handler {
 	return &handler{
 		userService:    userService,
 		userRepository: userRepository,

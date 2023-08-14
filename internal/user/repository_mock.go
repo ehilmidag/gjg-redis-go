@@ -12,31 +12,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockDataRepository is a mock of DataRepository interface.
-type MockDataRepository struct {
+// MockRepository is a mock of Repository interface.
+type MockRepository struct {
 	ctrl     *gomock.Controller
-	recorder *MockDataRepositoryMockRecorder
+	recorder *MockRepositoryMockRecorder
 }
 
-// MockDataRepositoryMockRecorder is the mock recorder for MockDataRepository.
-type MockDataRepositoryMockRecorder struct {
-	mock *MockDataRepository
+// MockRepositoryMockRecorder is the mock recorder for MockRepository.
+type MockRepositoryMockRecorder struct {
+	mock *MockRepository
 }
 
-// NewMockDataRepository creates a new mock instance.
-func NewMockDataRepository(ctrl *gomock.Controller) *MockDataRepository {
-	mock := &MockDataRepository{ctrl: ctrl}
-	mock.recorder = &MockDataRepositoryMockRecorder{mock}
+// NewMockRepository creates a new mock instance.
+func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
+	mock := &MockRepository{ctrl: ctrl}
+	mock.recorder = &MockRepositoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockDataRepository) EXPECT() *MockDataRepositoryMockRecorder {
+func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
 // MySQLCreateUser mocks base method.
-func (m *MockDataRepository) MySQLCreateUser(ctx context.Context, user *models.UserCreateEntity) error {
+func (m *MockRepository) MySQLCreateUser(ctx context.Context, user *models.UserCreateEntity) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MySQLCreateUser", ctx, user)
 	ret0, _ := ret[0].(error)
@@ -44,13 +44,13 @@ func (m *MockDataRepository) MySQLCreateUser(ctx context.Context, user *models.U
 }
 
 // MySQLCreateUser indicates an expected call of MySQLCreateUser.
-func (mr *MockDataRepositoryMockRecorder) MySQLCreateUser(ctx, user interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) MySQLCreateUser(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MySQLCreateUser", reflect.TypeOf((*MockDataRepository)(nil).MySQLCreateUser), ctx, user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MySQLCreateUser", reflect.TypeOf((*MockRepository)(nil).MySQLCreateUser), ctx, user)
 }
 
 // MySQLGetUserByID mocks base method.
-func (m *MockDataRepository) MySQLGetUserByID(ctx context.Context, userid string) (*models.UserCreateEntity, error) {
+func (m *MockRepository) MySQLGetUserByID(ctx context.Context, userid string) (*models.UserCreateEntity, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MySQLGetUserByID", ctx, userid)
 	ret0, _ := ret[0].(*models.UserCreateEntity)
@@ -59,13 +59,13 @@ func (m *MockDataRepository) MySQLGetUserByID(ctx context.Context, userid string
 }
 
 // MySQLGetUserByID indicates an expected call of MySQLGetUserByID.
-func (mr *MockDataRepositoryMockRecorder) MySQLGetUserByID(ctx, userid interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) MySQLGetUserByID(ctx, userid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MySQLGetUserByID", reflect.TypeOf((*MockDataRepository)(nil).MySQLGetUserByID), ctx, userid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MySQLGetUserByID", reflect.TypeOf((*MockRepository)(nil).MySQLGetUserByID), ctx, userid)
 }
 
 // MySQLUpdatePoint mocks base method.
-func (m *MockDataRepository) MySQLUpdatePoint(ctx context.Context, update *models.SendScoreEntity) (*models.SendScoreDto, error) {
+func (m *MockRepository) MySQLUpdatePoint(ctx context.Context, update *models.SendScoreEntity) (*models.SendScoreDto, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MySQLUpdatePoint", ctx, update)
 	ret0, _ := ret[0].(*models.SendScoreDto)
@@ -74,13 +74,13 @@ func (m *MockDataRepository) MySQLUpdatePoint(ctx context.Context, update *model
 }
 
 // MySQLUpdatePoint indicates an expected call of MySQLUpdatePoint.
-func (mr *MockDataRepositoryMockRecorder) MySQLUpdatePoint(ctx, update interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) MySQLUpdatePoint(ctx, update interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MySQLUpdatePoint", reflect.TypeOf((*MockDataRepository)(nil).MySQLUpdatePoint), ctx, update)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MySQLUpdatePoint", reflect.TypeOf((*MockRepository)(nil).MySQLUpdatePoint), ctx, update)
 }
 
 // RedisCreateUser mocks base method.
-func (m *MockDataRepository) RedisCreateUser(ctx context.Context, userid string) error {
+func (m *MockRepository) RedisCreateUser(ctx context.Context, userid string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RedisCreateUser", ctx, userid)
 	ret0, _ := ret[0].(error)
@@ -88,13 +88,13 @@ func (m *MockDataRepository) RedisCreateUser(ctx context.Context, userid string)
 }
 
 // RedisCreateUser indicates an expected call of RedisCreateUser.
-func (mr *MockDataRepositoryMockRecorder) RedisCreateUser(ctx, userid interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) RedisCreateUser(ctx, userid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisCreateUser", reflect.TypeOf((*MockDataRepository)(nil).RedisCreateUser), ctx, userid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisCreateUser", reflect.TypeOf((*MockRepository)(nil).RedisCreateUser), ctx, userid)
 }
 
 // RedisCreateUserByCountry mocks base method.
-func (m *MockDataRepository) RedisCreateUserByCountry(ctx context.Context, userid, countryCode string) error {
+func (m *MockRepository) RedisCreateUserByCountry(ctx context.Context, userid, countryCode string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RedisCreateUserByCountry", ctx, userid, countryCode)
 	ret0, _ := ret[0].(error)
@@ -102,13 +102,13 @@ func (m *MockDataRepository) RedisCreateUserByCountry(ctx context.Context, useri
 }
 
 // RedisCreateUserByCountry indicates an expected call of RedisCreateUserByCountry.
-func (mr *MockDataRepositoryMockRecorder) RedisCreateUserByCountry(ctx, userid, countryCode interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) RedisCreateUserByCountry(ctx, userid, countryCode interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisCreateUserByCountry", reflect.TypeOf((*MockDataRepository)(nil).RedisCreateUserByCountry), ctx, userid, countryCode)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisCreateUserByCountry", reflect.TypeOf((*MockRepository)(nil).RedisCreateUserByCountry), ctx, userid, countryCode)
 }
 
 // RedisGetRankByID mocks base method.
-func (m *MockDataRepository) RedisGetRankByID(ctx context.Context, userid string) (int64, error) {
+func (m *MockRepository) RedisGetRankByID(ctx context.Context, userid string) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RedisGetRankByID", ctx, userid)
 	ret0, _ := ret[0].(int64)
@@ -117,13 +117,13 @@ func (m *MockDataRepository) RedisGetRankByID(ctx context.Context, userid string
 }
 
 // RedisGetRankByID indicates an expected call of RedisGetRankByID.
-func (mr *MockDataRepositoryMockRecorder) RedisGetRankByID(ctx, userid interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) RedisGetRankByID(ctx, userid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisGetRankByID", reflect.TypeOf((*MockDataRepository)(nil).RedisGetRankByID), ctx, userid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisGetRankByID", reflect.TypeOf((*MockRepository)(nil).RedisGetRankByID), ctx, userid)
 }
 
 // RedisLeaderBoard mocks base method.
-func (m *MockDataRepository) RedisLeaderBoard(ctx context.Context) ([]string, error) {
+func (m *MockRepository) RedisLeaderBoard(ctx context.Context) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RedisLeaderBoard", ctx)
 	ret0, _ := ret[0].([]string)
@@ -132,13 +132,13 @@ func (m *MockDataRepository) RedisLeaderBoard(ctx context.Context) ([]string, er
 }
 
 // RedisLeaderBoard indicates an expected call of RedisLeaderBoard.
-func (mr *MockDataRepositoryMockRecorder) RedisLeaderBoard(ctx interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) RedisLeaderBoard(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisLeaderBoard", reflect.TypeOf((*MockDataRepository)(nil).RedisLeaderBoard), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisLeaderBoard", reflect.TypeOf((*MockRepository)(nil).RedisLeaderBoard), ctx)
 }
 
 // RedisLeaderBoardByCountry mocks base method.
-func (m *MockDataRepository) RedisLeaderBoardByCountry(ctx context.Context, country string) ([]string, error) {
+func (m *MockRepository) RedisLeaderBoardByCountry(ctx context.Context, country string) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RedisLeaderBoardByCountry", ctx, country)
 	ret0, _ := ret[0].([]string)
@@ -147,13 +147,13 @@ func (m *MockDataRepository) RedisLeaderBoardByCountry(ctx context.Context, coun
 }
 
 // RedisLeaderBoardByCountry indicates an expected call of RedisLeaderBoardByCountry.
-func (mr *MockDataRepositoryMockRecorder) RedisLeaderBoardByCountry(ctx, country interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) RedisLeaderBoardByCountry(ctx, country interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisLeaderBoardByCountry", reflect.TypeOf((*MockDataRepository)(nil).RedisLeaderBoardByCountry), ctx, country)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisLeaderBoardByCountry", reflect.TypeOf((*MockRepository)(nil).RedisLeaderBoardByCountry), ctx, country)
 }
 
 // RedisScoreUpdate mocks base method.
-func (m *MockDataRepository) RedisScoreUpdate(ctx context.Context, userid string, score float64) error {
+func (m *MockRepository) RedisScoreUpdate(ctx context.Context, userid string, score float64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RedisScoreUpdate", ctx, userid, score)
 	ret0, _ := ret[0].(error)
@@ -161,13 +161,13 @@ func (m *MockDataRepository) RedisScoreUpdate(ctx context.Context, userid string
 }
 
 // RedisScoreUpdate indicates an expected call of RedisScoreUpdate.
-func (mr *MockDataRepositoryMockRecorder) RedisScoreUpdate(ctx, userid, score interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) RedisScoreUpdate(ctx, userid, score interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisScoreUpdate", reflect.TypeOf((*MockDataRepository)(nil).RedisScoreUpdate), ctx, userid, score)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisScoreUpdate", reflect.TypeOf((*MockRepository)(nil).RedisScoreUpdate), ctx, userid, score)
 }
 
 // RedisScoreUpdateByCountry mocks base method.
-func (m *MockDataRepository) RedisScoreUpdateByCountry(ctx context.Context, userid, countryCode string, score float64) error {
+func (m *MockRepository) RedisScoreUpdateByCountry(ctx context.Context, userid, countryCode string, score float64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RedisScoreUpdateByCountry", ctx, userid, countryCode, score)
 	ret0, _ := ret[0].(error)
@@ -175,7 +175,7 @@ func (m *MockDataRepository) RedisScoreUpdateByCountry(ctx context.Context, user
 }
 
 // RedisScoreUpdateByCountry indicates an expected call of RedisScoreUpdateByCountry.
-func (mr *MockDataRepositoryMockRecorder) RedisScoreUpdateByCountry(ctx, userid, countryCode, score interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) RedisScoreUpdateByCountry(ctx, userid, countryCode, score interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisScoreUpdateByCountry", reflect.TypeOf((*MockDataRepository)(nil).RedisScoreUpdateByCountry), ctx, userid, countryCode, score)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RedisScoreUpdateByCountry", reflect.TypeOf((*MockRepository)(nil).RedisScoreUpdateByCountry), ctx, userid, countryCode, score)
 }

@@ -19,11 +19,11 @@ type Service interface {
 }
 
 type service struct {
-	userRepository *repository
+	userRepository Repository
 }
 
 func NewService(
-	userRepository *repository,
+	userRepository Repository,
 ) Service {
 	return &service{
 		userRepository: userRepository,
