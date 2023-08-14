@@ -1,0 +1,20 @@
+version: '3'
+services:
+  go-app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - mysql
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+  mysql:
+    image: "mysql:latest"
+    ports:
+      - "3306:3306"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=12345"
+      - "MYSQL_DATABASE=user"

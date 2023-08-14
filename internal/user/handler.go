@@ -23,6 +23,8 @@ func (h *handler) RegisterRoutes(app *fiber.App) {
 	app.Post("/user/create", h.CreateUser)
 	app.Get("/user/profile/:userID", h.GetUserByID)
 	app.Post("/score/submit", h.ScoreSubmit)
+	app.Get("/leaderboard", h.LeaderBoard)
+	app.Get("/leaderboard/:country_iso_code", h.LeaderBoardByCountry)
 
 }
 
@@ -55,7 +57,7 @@ func (h *handler) GetUserByID(ctx *fiber.Ctx) error {
 	userId := ctx.Params("userID")
 	fmt.Println(userId)
 
-	userGetByIDResponse, err := h.userRepository.MySQLGetUserByID(ctx.Context(), userId)
+	userGetByIDResponse, err := h.userService.GetUserDetailsByID(ctx.Context(), userId)
 	if err != nil {
 		cerr := cerror.NewError(500, err.Error())
 		return cerr
@@ -66,7 +68,7 @@ func (h *handler) GetUserByID(ctx *fiber.Ctx) error {
 func (h *handler) ScoreSubmit(ctx *fiber.Ctx) error {
 	var scoreUpdateRequest *models.SendScore
 	err := ctx.BodyParser(&scoreUpdateRequest)
-	fmt.Println(scoreUpdateRequest)
+
 	if err != nil {
 		cerr := cerror.NewError(400, "Parse error")
 		return cerr
@@ -76,4 +78,23 @@ func (h *handler) ScoreSubmit(ctx *fiber.Ctx) error {
 		return err
 	}
 	return ctx.Status(200).JSON(&scoreUpdateResponse)
+}
+
+func (h *handler) LeaderBoard(ctx *fiber.Ctx) error {
+	leaderBoard, err := h.userService.GetLeaderBoard(ctx.Context())
+	if err != nil {
+		cerr := cerror.NewError(500, err.Error())
+		return cerr
+	}
+	return ctx.Status(200).JSON(&leaderBoard)
+}
+func (h *handler) LeaderBoardByCountry(ctx *fiber.Ctx) error {
+	country := ctx.Params("country_iso_code")
+
+	leaderBoard, err := h.userService.GetLeaderBoardByCountry(ctx.Context(), country)
+	if err != nil {
+		cerr := cerror.NewError(500, err.Error())
+		return cerr
+	}
+	return ctx.Status(200).JSON(&leaderBoard)
 }

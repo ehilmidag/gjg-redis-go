@@ -68,9 +68,6 @@ func ReadMySqlConfig() (*MySQLConfig, error) {
 
 	}
 	mySQLDbName := os.Getenv(MySQLDbName)
-	if mySQLDbName == "" {
-		return nil, fmt.Errorf(EnvironmentVariableNotDefined, MySQLDbName)
-	}
 
 	return &MySQLConfig{
 		Username: mySqlUsername,

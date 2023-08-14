@@ -2,7 +2,8 @@ package models
 
 type SendScore struct {
 	UserID      string  `json:"user_id"`
-	CountryCode string  `json:"country_code"`
+	DisplayName string  `json:"display_name"`
+	Country     string  `json:"country"`
 	ScoreWorth  float64 `json:"score"`
 }
 
@@ -15,6 +16,5 @@ type SendScoreDto struct {
 type SendScoreEntity struct {
 	UserID     string  `json:"user_id"`
 	TotalScore float64 `json:"total_score"`
-	Rank       int64   `json:"rank"`
 	TimeStamp  int64   `json:"time_stamp"`
 }

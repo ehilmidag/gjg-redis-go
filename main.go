@@ -1,14 +1,17 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"gjg-redis-go/internal/user"
-	"log"
+	"gjg-redis-go/internal/user/models"
+	_ "gjg-redis-go/pkg/cerror"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+
 	"os"
 	"path/filepath"
 
@@ -38,7 +41,7 @@ func main() {
 	}
 	mySqlconf, err := config.ReadMySqlConfig()
 	fmt.Println(mySqlconf)
-	db, err := initializeDB(mySqlconf)
+	db, err := initializeDB()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,11 +68,6 @@ func main() {
 	}
 }
 
-func dsn(sqlConfig *config.MySQLConfig) string {
-	return fmt.Sprintf("%s:%s@tcp(%s)/%s", sqlConfig.Username, sqlConfig.Password, sqlConfig.Hostname, "user")
-
-}
-
 func RedisClient(redisConfig *config.RedisConfig) *redis.Client {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     redisConfig.Addr,
@@ -79,34 +77,53 @@ func RedisClient(redisConfig *config.RedisConfig) *redis.Client {
 	return redisClient
 }
 
-func initializeDB(sqlConfig *config.MySQLConfig) (*sql.DB, error) {
-	dataSourceName := dsn(sqlConfig)
-	db, err := sql.Open("mysql", dataSourceName)
+func initializeDB() (*gorm.DB, error) {
+	dsn := "root:12345@tcp(127.0.0.1:3306)/user"
+	fmt.Println(dsn, "birinci dsn")
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
 	if err != nil {
-		log.Fatal("Veritabanı bağlantısı oluşturulamadı:", err)
+		fmt.Println("Veritabanına bağlanırken bir hata oluştu:", err)
+		return nil, err
 	}
 
-	fmt.Println(sqlConfig.Dbname)
+	db = db.Debug()
 
-	// "user" tablosunu oluşturma
-	createTableQuery := `
-	CREATE TABLE IF NOT EXISTS user (
-   user_id VARCHAR(255) PRIMARY KEY,
-    display_name VARCHAR(255),
-    hashed_password VARCHAR(255),
-    points DOUBLE,
-    user_rank BIGINT,
-    country_code VARCHAR(255),
-    created_at BIGINT,
-    updated_at BIGINT
-);
-	`
-
-	_, err = db.Exec(createTableQuery)
+	// Veritabanını otomatik olarak oluştur
+	err = db.Exec("CREATE DATABASE IF NOT EXISTS user").Error
 	if err != nil {
-		log.Fatal("Tablo oluşturulurken hata oluştu:", err)
+		fmt.Println("Veritabanı oluşturulurken bir hata oluştu:", err)
+		return nil, err
 	}
 
-	fmt.Println("user tablosu başarıyla oluşturuldu.")
-	return db, err
+	// Veritabanı bağlantısını kapat ve yeni veritabanı adıyla tekrar aç
+	dbSQL, err := db.DB()
+	if err != nil {
+		fmt.Println("Veritabanı bağlantısı kapatılırken bir hata oluştu:", err)
+		return nil, err
+
+	}
+	dbSQL.Close()
+
+	dsn = "root:12345@tcp(127.0.0.1:3306)/user"
+	fmt.Println(dsn, "ikinci dsn")
+
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		fmt.Println("Yeni veritabanına bağlanırken bir hata oluştu:", err)
+		return nil, err
+
+	}
+
+	// Gerekli tabloyu otomatik olarak oluştur
+	err = db.AutoMigrate(&models.UserCreateEntity{})
+	if err != nil {
+		fmt.Println("Tablo oluşturulurken bir hata oluştu:", err)
+		return nil, err
+	}
+
+	fmt.Println("Veritabanına başarıyla bağlandı ve gerekli tablo oluşturuldu.")
+
+	return db, nil
 }

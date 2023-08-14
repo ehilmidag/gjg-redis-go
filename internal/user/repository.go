@@ -2,12 +2,10 @@ package user
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"gjg-redis-go/internal/user/models"
-	"log"
-	"time"
+	"gorm.io/gorm"
 )
 
 type DataRepository interface {
@@ -16,17 +14,19 @@ type DataRepository interface {
 	RedisGetRankByID(ctx context.Context, userid string) (int64, error)
 	RedisScoreUpdate(ctx context.Context, userid string, score float64) error
 	RedisScoreUpdateByCountry(ctx context.Context, userid string, countryCode string, score float64) error
-	MySQLCreateUser(ctx context.Context, user *models.UserCreateEntity) (*models.UserCreateDTO, error)
-	MySQLGetUserByID(ctx context.Context, userid string) (*models.UserCreateDTO, error)
+	RedisLeaderBoard(ctx context.Context) ([]string, error)
+	RedisLeaderBoardByCountry(ctx context.Context, country string) ([]string, error)
+	MySQLCreateUser(ctx context.Context, user *models.UserCreateEntity) error
+	MySQLGetUserByID(ctx context.Context, userid string) (*models.UserCreateEntity, error)
 	MySQLUpdatePoint(ctx context.Context, update *models.SendScoreEntity) (*models.SendScoreDto, error)
 }
 
 type repository struct {
-	mysql *sql.DB
+	mysql *gorm.DB
 	redis *redis.Client
 }
 
-func NewRepository(sqlDB *sql.DB, redisClient *redis.Client) *repository {
+func NewRepository(sqlDB *gorm.DB, redisClient *redis.Client) *repository {
 	return &repository{
 		mysql: sqlDB,
 		redis: redisClient,
@@ -45,11 +45,13 @@ func (r *repository) RedisCreateUser(ctx context.Context, userid string) error {
 	return nil
 }
 func (r *repository) RedisCreateUserByCountry(ctx context.Context, userid string, countryCode string) error {
-
-	_, err := r.redis.ZAdd(ctx, fmt.Sprint("leaderboard:"+countryCode), &redis.Z{
+	fmt.Println(countryCode)
+	fmt.Println(fmt.Sprintf("leaderboard:%s", countryCode))
+	a, err := r.redis.ZAdd(ctx, fmt.Sprint("leaderboard:", countryCode), &redis.Z{
 		Score:  0,
 		Member: userid,
 	}).Result()
+	fmt.Println(a, "redis createden dönen")
 	if err != nil {
 		return err
 	}
@@ -80,80 +82,59 @@ func (r *repository) RedisScoreUpdateByCountry(ctx context.Context, userid strin
 	return nil
 }
 
-func (r *repository) MySQLCreateUser(ctx context.Context, user *models.UserCreateEntity) (*models.UserCreateDTO, error) {
+func (r *repository) MySQLCreateUser(ctx context.Context, user *models.UserCreateEntity) error {
 
-	query := `
-		INSERT INTO user (user_id, display_name, hashed_password, points, user_rank,country_code,created_at,updated_at)
-		VALUES (?, ?, ?, ?, ?, ?,?,?)
-	`
-	ctx, cancelfunc := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelfunc()
-	stmt, err := r.mysql.PrepareContext(ctx, query)
-	if err != nil {
-		log.Printf("Error %s when preparing SQL statement", err)
-		return nil, err
+	result := r.mysql.Create(user)
+	if result.Error != nil {
+		return result.Error
 	}
-	defer stmt.Close()
-	res, err := stmt.ExecContext(ctx, user.UserID, user.DisplayName, user.HashedPassword, user.Points, user.Rank, user.CountryCode, user.CreatedAt, user.UpdatedAt)
-	if err != nil {
-		log.Printf("Error %s when inserting row into user table", err)
-		return nil, err
-	}
-	rows, err := res.RowsAffected()
-	if err != nil {
-		log.Printf("Error %s when finding rows affected", err)
-		return nil, err
-	}
-	log.Printf("%d user created ", rows)
-	userDto := &models.UserCreateDTO{
-		UserID:      user.UserID,
-		DisplayName: user.DisplayName,
-		Points:      user.Points,
-		Rank:        user.Rank,
-	}
-	return userDto, nil
+	return nil
 }
-func (r *repository) MySQLGetUserByID(ctx context.Context, userid string) (*models.UserCreateDTO, error) {
-	query := "SELECT * FROM user WHERE user_id = ?"
-	row := r.mysql.QueryRow(query, userid)
 
+func (r *repository) MySQLGetUserByID(ctx context.Context, userid string) (*models.UserCreateEntity, error) {
 	var userEntity models.UserCreateEntity
 
-	err := row.Scan(&userEntity.UserID, &userEntity.DisplayName, &userEntity.HashedPassword, &userEntity.Points, &userEntity.Rank, &userEntity.CountryCode, &userEntity.CreatedAt, &userEntity.UpdatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
+	result := r.mysql.Where("user_id = ?", userid).First(&userEntity)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("Kullanıcı bulunamadı.")
 		}
-		return nil, err
+		return nil, result.Error
 	}
 
-	userdto := &models.UserCreateDTO{
-		UserID:      userEntity.UserID,
-		DisplayName: userEntity.DisplayName,
-		Points:      userEntity.Points,
-		Rank:        userEntity.Rank,
-	}
-	fmt.Println(userdto)
-
-	return userdto, nil
+	return &userEntity, nil
 }
 
 func (r *repository) MySQLUpdatePoint(ctx context.Context, update *models.SendScoreEntity) (*models.SendScoreDto, error) {
+	var sendScoreDto models.SendScoreDto
 
-	stmt, err := r.mysql.Prepare("UPDATE user SET points = ?, user_rank = ?, updated_at = ? WHERE user_id = ?")
+	result := r.mysql.Model(&models.SendScoreDto{}).Where("user_id = ?", update.UserID).
+		Updates(map[string]interface{}{
+			"total_score": update.TotalScore,
+			"updated_at":  update.TimeStamp,
+		})
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	sendScoreDto.UserID = update.UserID
+	sendScoreDto.ScoreWorth = update.TotalScore
+	sendScoreDto.TimeStamp = update.TimeStamp
+	return &sendScoreDto, nil
+}
+
+func (r *repository) RedisLeaderBoard(ctx context.Context) ([]string, error) {
+	results, err := r.redis.ZRevRange(ctx, "leaderboard", 0, 999).Result()
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
+	return results, nil
+}
 
-	_, err = stmt.Exec(&update.TotalScore, &update.Rank, &update.TimeStamp, &update.UserID)
+func (r *repository) RedisLeaderBoardByCountry(ctx context.Context, country string) ([]string, error) {
+	results, err := r.redis.ZRevRange(ctx, fmt.Sprintf("leaderboard:%s", country), 0, 999).Result()
 	if err != nil {
 		return nil, err
 	}
-	sendScoreDto := &models.SendScoreDto{
-		UserID:     update.UserID,
-		ScoreWorth: update.TotalScore,
-		TimeStamp:  update.TimeStamp,
-	}
-	return sendScoreDto, nil
+	return results, nil
 }
