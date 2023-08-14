@@ -108,10 +108,10 @@ func (r *repository) MySQLGetUserByID(ctx context.Context, userid string) (*mode
 func (r *repository) MySQLUpdatePoint(ctx context.Context, update *models.SendScoreEntity) (*models.SendScoreDto, error) {
 	var sendScoreDto models.SendScoreDto
 
-	result := r.mysql.Model(&models.SendScoreDto{}).Where("user_id = ?", update.UserID).
+	result := r.mysql.Model(&models.UserCreateEntity{}).Where("user_id = ?", update.UserID).
 		Updates(map[string]interface{}{
-			"total_score": update.TotalScore,
-			"updated_at":  update.TimeStamp,
+			"points":     update.TotalScore,
+			"updated_at": update.TimeStamp,
 		})
 	if result.Error != nil {
 		return nil, result.Error

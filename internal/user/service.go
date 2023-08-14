@@ -2,13 +2,11 @@ package user
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"gjg-redis-go/internal/user/models"
 	"gjg-redis-go/pkg/cerror"
 	"golang.org/x/crypto/bcrypt"
-	"sync"
 	"time"
 )
 
@@ -34,28 +32,17 @@ func NewService(
 
 func (s *service) CreateUser(ctx context.Context, user *models.SignIn) (*models.UserResponseModel, error) {
 	userid := uuid.New().String()
-	var wg sync.WaitGroup
-	var errCreateUser, errCreateUserByCountry error
-
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		errCreateUser = s.userRepository.RedisCreateUser(ctx, userid)
-	}()
-
-	go func() {
-		defer wg.Done()
-		errCreateUserByCountry = s.userRepository.RedisCreateUserByCountry(ctx, userid, user.Country)
-	}()
-
-	wg.Wait()
-
-	if errCreateUser != nil || errCreateUserByCountry != nil {
-		return nil, errors.New("create user redis error")
+	err := s.userRepository.RedisCreateUser(ctx, userid)
+	if err != nil {
+		cerr := cerror.NewError(500, "create user redis error")
+		return nil, cerr
 	}
-
 	fmt.Println("redis user created")
+	err = s.userRepository.RedisCreateUserByCountry(ctx, userid, user.Country)
+	if err != nil {
+		cerr := cerror.NewError(500, "create user redis error")
+		return nil, cerr
+	}
 	fmt.Println("redis user country base createdx")
 	rank, err := s.userRepository.RedisGetRankByID(ctx, userid)
 	if err != nil {
