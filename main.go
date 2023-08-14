@@ -78,7 +78,7 @@ func RedisClient(redisConfig *config.RedisConfig) *redis.Client {
 }
 
 func initializeDB() (*gorm.DB, error) {
-	dsn := "root:12345@tcp(127.0.0.1:3306)/user"
+	dsn := "root:@tcp(localhost:3306)/"
 	fmt.Println(dsn, "birinci dsn")
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
@@ -105,7 +105,7 @@ func initializeDB() (*gorm.DB, error) {
 	}
 	dbSQL.Close()
 
-	dsn = "root:12345@tcp(127.0.0.1:3306)/user"
+	dsn = "root:@tcp(localhost:3306)/user"
 	fmt.Println(dsn, "ikinci dsn")
 
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
